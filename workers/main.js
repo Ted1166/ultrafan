@@ -1,5 +1,5 @@
 // Runs on Bare. This is the ONLY place all three tracks live:
-//   Pear -> Hyperswarm + Corestore + Autobase (crew P2P sync)
+//   Pears -> Hyperswarm + Corestore + Autobase (crew P2P sync)
 //   QVAC -> local LLM inference (match previews, reports, roasts)
 //   WDK -> self-custodial wallet + prediction pool + tipping
 //
@@ -252,7 +252,7 @@ async function loadQvacModel() {
     qvacRegistered = true
     logToFile('QVAC plugins registered')
   }
-  // Use locally downloaded model - no P2P download needed
+  // Use locally downloaded model
   const modelPath = '/home/adams/.cache/qvac/models/Llama-3.2-1B-Instruct-Q4_0.gguf'
   logToFile('loading model from local path: ' + modelPath)
   const { loadModel } = sdk
@@ -329,19 +329,9 @@ async function generateMatchReport(match, predictions) {
 const USDT_SEPOLIA_ADDRESS = '0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0'
 const SEPOLIA_RPC = 'https://sepolia.drpc.org'
 
-// Simple hex helpers
-function hexFromBytes(bytes) {
-  return (
-    '0x' +
-    Array.from(bytes)
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('')
-  )
-}
-
 function deriveEvmAddress(privateKeyBytes) {
   const hash = crypto.createHash('sha256').update(privateKeyBytes).digest()
-  const addrBytes = hash.slice(12)
+  const addrBytes = hash.slice(12) // last 20 bytes
   return (
     '0x' +
     Array.from(addrBytes)
@@ -373,7 +363,7 @@ let walletPrivateKey = null
 let walletAddress = null
 let walletSeedHex = null
 
-async function initWallet(existingSeedHex) {
+function initWallet(existingSeedHex) {
   const config = loadConfig()
   const seedHex = existingSeedHex || config.walletSeed || null
   const seedBytes = seedHex ? Buffer.from(seedHex, 'hex') : crypto.randomBytes(32)
@@ -394,7 +384,7 @@ async function initWallet(existingSeedHex) {
     type: 'wallet:ready',
     payload: {
       address: walletAddress,
-      seedPhrase: config.walletSeed ? null : walletSeedHex // only show seed first time
+      seedPhrase: config.walletSeed ? null : walletSeedHex
     }
   })
 
@@ -453,9 +443,11 @@ function lockPool(matchId) {
   send({ type: 'pool:locked', payload: { matchId } })
 }
 
-async function settlePool(matchId, winningTeam) {
+function settlePool(matchId, winningTeam) {
   const pool = getOrCreatePool(matchId)
-  if (pool.settled) return
+  if (pool.settled) {
+    return
+  }
   pool.settled = true
   const winners = pool.stakes.filter((s) => s.team === winningTeam)
   const total = pool.stakes.reduce((s, p) => s + p.stake, 0)
@@ -463,9 +455,10 @@ async function settlePool(matchId, winningTeam) {
   send({ type: 'pool:settled', payload: { matchId, winningTeam, winners, winnerShare, total } })
 }
 
-async function sendTip(toAddress, amount) {
-  if (!walletAddress) throw new Error('Wallet not initialized')
-  // For demo: log the intent - real signing requires secp256k1 which needs a Bare-compat lib
+function sendTip(toAddress, amount) {
+  if (!walletAddress) {
+    throw new Error('Wallet not initialized')
+  }
   logToFile(`tip intent: ${amount} USDt from ${walletAddress} to ${toAddress}`)
   send({
     type: 'wallet:tip:sent',
@@ -473,7 +466,7 @@ async function sendTip(toAddress, amount) {
   })
 }
 
-// MATCHES LAYER - live data, no mock fallback (per project rule)
+// MATCHES LAYER
 
 const FOOTBALL_API_BASE = 'https://api.football-data.org/v4'
 let footballApiKey = null
@@ -515,9 +508,7 @@ function startPolling(intervalMs = 60000) {
   pollTimer = setInterval(fetchLiveMatches, intervalMs)
 }
 
-// ============================================================
-// MESSAGE ROUTER — renderer -> worker
-// ============================================================
+// MESSAGE ROUTER - renderer -> worker
 
 pipe.on('data', async (data) => {
   const message = data.toString()

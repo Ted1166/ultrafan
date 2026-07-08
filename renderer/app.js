@@ -7,7 +7,7 @@ const encoder = new TextEncoder()
 
 const WORKER = '/workers/main.js'
 
-let myName = 'You'
+const myName = 'You'
 let myAddress = null
 let aiReady = false
 let walletReady = false
@@ -31,7 +31,7 @@ function setupWorkerListeners() {
     try {
       msg = JSON.parse(raw)
     } catch {
-      // raw pear updater strings ('updating', 'updated', etc) - ignore here
+      // raw pear updater strings ('updating', 'updated', etc)
       return
     }
     handleWorkerMessage(msg)
@@ -43,7 +43,7 @@ function setupWorkerListeners() {
 
   bridge.onWorkerStderr(WORKER, (data) => {
     const msg = decoder.decode(data)
-    // Suppress llama.cpp verbose repacking noise — not actionable errors
+    // Suppress llama.cpp verbose repacking noise
     if (
       msg.includes('repack:') ||
       msg.includes('ggml_vulkan') ||
@@ -54,8 +54,9 @@ function setupWorkerListeners() {
       msg.includes('common_init_result') ||
       msg.includes('parse: load') ||
       msg.includes('build.md')
-    )
+    ) {
       return
+    }
     console.error('[worker stderr]', msg)
   })
 
@@ -127,7 +128,7 @@ function handleWorkerMessage(msg) {
       }
       // Render wallet card if crew view is active
       renderWalletCard(msg.payload.seedPhrase)
-      // Request balance (non-blocking, may fail silently)
+      // Request balance
       sendToWorker('wallet:balance')
       break
     }
@@ -343,7 +344,9 @@ function enterContextView() {
     })
   document.getElementById('btn-set-api-key-2').addEventListener('click', () => {
     const key = document.getElementById('api-key-input-2').value.trim()
-    if (!key) return
+    if (!key) {
+      return
+    }
     sendToWorker('matches:setApiKey', { apiKey: key })
     document.getElementById('btn-set-api-key-2').textContent = 'Connected'
     document.getElementById('btn-set-api-key-2').disabled = true
@@ -352,7 +355,9 @@ function enterContextView() {
 
 function renderWalletCard(seedPhrase) {
   const card = document.getElementById('wallet-card')
-  if (!card) return
+  if (!card) {
+    return
+  }
   card.innerHTML = `
     <div class="card-label">Wallet</div>
     <div class="wallet-balance" id="wallet-balance-display">— USDt</div>
