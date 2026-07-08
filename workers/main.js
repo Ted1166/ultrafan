@@ -10,7 +10,7 @@ const crashLogPath = '/tmp/ultrafan-crash.log'
 function logToFile(msg) {
   try {
     fs.appendFileSync(crashLogPath, `[${new Date().toISOString()}] ${msg}\n`)
-  } catch { }
+  } catch {}
 }
 
 Bare.on('uncaughtException', (err) => {
@@ -90,7 +90,7 @@ function loadConfig() {
     if (fs.existsSync(configPath)) {
       return JSON.parse(fs.readFileSync(configPath, 'utf8'))
     }
-  } catch { }
+  } catch {}
   return {}
 }
 
@@ -119,7 +119,7 @@ goodbye(async () => {
     try {
       const { unloadModel } = require('@qvac/bare-sdk')
       await unloadModel({ modelId: qvacModelId })
-    } catch { }
+    } catch {}
   }
   await ultrafanSwarm.destroy()
   await swarm.destroy()
@@ -331,13 +331,23 @@ const SEPOLIA_RPC = 'https://sepolia.drpc.org'
 
 // Simple hex helpers
 function hexFromBytes(bytes) {
-  return '0x' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
+  return (
+    '0x' +
+    Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+  )
 }
 
 function deriveEvmAddress(privateKeyBytes) {
   const hash = crypto.createHash('sha256').update(privateKeyBytes).digest()
   const addrBytes = hash.slice(12)
-  return '0x' + Array.from(addrBytes).map(b => b.toString(16).padStart(2, '0')).join('')
+  return (
+    '0x' +
+    Array.from(addrBytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+  )
 }
 
 async function rpcCall(method, params) {
@@ -388,7 +398,7 @@ async function initWallet(existingSeedHex) {
     }
   })
 
-  getWalletBalance().catch(err => logToFile('background balance failed: ' + err.message))
+  getWalletBalance().catch((err) => logToFile('background balance failed: ' + err.message))
 }
 
 async function getWalletBalance() {
@@ -399,10 +409,7 @@ async function getWalletBalance() {
 
     // ERC20 balanceOf call for USDt
     const data = '0x70a08231' + walletAddress.slice(2).padStart(64, '0')
-    const usdtRaw = await rpcCall('eth_call', [
-      { to: USDT_SEPOLIA_ADDRESS, data },
-      'latest'
-    ])
+    const usdtRaw = await rpcCall('eth_call', [{ to: USDT_SEPOLIA_ADDRESS, data }, 'latest'])
     const usdtBalance = parseInt(usdtRaw, 16) / 1e6
 
     logToFile(`balance: ${ethBalance} ETH, ${usdtBalance} USDt`)
@@ -460,7 +467,10 @@ async function sendTip(toAddress, amount) {
   if (!walletAddress) throw new Error('Wallet not initialized')
   // For demo: log the intent - real signing requires secp256k1 which needs a Bare-compat lib
   logToFile(`tip intent: ${amount} USDt from ${walletAddress} to ${toAddress}`)
-  send({ type: 'wallet:tip:sent', payload: { to: toAddress, amount, txHash: 'demo-' + Date.now() } })
+  send({
+    type: 'wallet:tip:sent',
+    payload: { to: toAddress, amount, txHash: 'demo-' + Date.now() }
+  })
 }
 
 // MATCHES LAYER - live data, no mock fallback (per project rule)
@@ -539,7 +549,12 @@ pipe.on('data', async (data) => {
         break
       }
       case 'crew:message': {
-        await appendToCrew({ type: 'message', from: msg.payload.from, text: msg.payload.text, ts: Date.now() })
+        await appendToCrew({
+          type: 'message',
+          from: msg.payload.from,
+          text: msg.payload.text,
+          ts: Date.now()
+        })
         break
       }
 
@@ -570,7 +585,12 @@ pipe.on('data', async (data) => {
       }
 
       case 'pool:stake': {
-        await stakePrediction(msg.payload.matchId, msg.payload.team, msg.payload.stake, msg.payload.from)
+        await stakePrediction(
+          msg.payload.matchId,
+          msg.payload.team,
+          msg.payload.stake,
+          msg.payload.from
+        )
         break
       }
       case 'pool:lock': {
@@ -602,22 +622,22 @@ send({ type: 'worker:ready', payload: {} })
 logToFile('worker fully ready, sent worker:ready')
 console.log('UltraFan worker started')
 
-  // - Auto-restore persisted config -
-  ; (async () => {
-    const config = loadConfig()
-    logToFile('loaded config: ' + JSON.stringify(Object.keys(config)))
+// - Auto-restore persisted config -
+;(async () => {
+  const config = loadConfig()
+  logToFile('loaded config: ' + JSON.stringify(Object.keys(config)))
 
-    if (config.walletSeed) {
-      logToFile('auto-restoring wallet from saved seed')
-      await initWallet(config.walletSeed).catch(e => logToFile('auto-wallet failed: ' + e.message))
-    }
+  if (config.walletSeed) {
+    logToFile('auto-restoring wallet from saved seed')
+    await initWallet(config.walletSeed).catch((e) => logToFile('auto-wallet failed: ' + e.message))
+  }
 
-    if (config.footballApiKey) {
-      logToFile('auto-restoring football API key')
-      footballApiKey = config.footballApiKey
-      startPolling()
-    }
+  if (config.footballApiKey) {
+    logToFile('auto-restoring football API key')
+    footballApiKey = config.footballApiKey
+    startPolling()
+  }
 
-    // Auto-load AI model from local cache
-    loadQvacModel().catch(e => logToFile('auto-load model failed: ' + e.message))
-  })()
+  // Auto-load AI model from local cache
+  loadQvacModel().catch((e) => logToFile('auto-load model failed: ' + e.message))
+})()

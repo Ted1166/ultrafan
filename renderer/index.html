@@ -1,463 +1,471 @@
 <!doctype html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>UltraFan</title>
+    <style>
+      @font-face {
+        font-family: 'Archivo Black';
+        src: local('Archivo Black');
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <title>UltraFan</title>
-  <style>
-    @font-face {
-      font-family: 'Archivo Black';
-      src: local('Archivo Black');
-    }
+      :root {
+        --pitch: #0b0e0c;
+        --turf: #1a2e1f;
+        --turf-light: #233a29;
+        --lime: #d4ff4f;
+        --chalk: #f5f2e8;
+        --sage: #7a8b7e;
+        --coral: #ff6b4a;
+        --line: rgba(245, 242, 232, 0.08);
+      }
 
-    :root {
-      --pitch: #0b0e0c;
-      --turf: #1a2e1f;
-      --turf-light: #233a29;
-      --lime: #d4ff4f;
-      --chalk: #f5f2e8;
-      --sage: #7a8b7e;
-      --coral: #ff6b4a;
-      --line: rgba(245, 242, 232, 0.08);
-    }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+      html,
+      body {
+        height: 100%;
+        background: var(--pitch);
+        color: var(--chalk);
+        font-family:
+          'Archivo',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        overflow: hidden;
+      }
 
-    html,
-    body {
-      height: 100%;
-      background: var(--pitch);
-      color: var(--chalk);
-      font-family:
-        'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      overflow: hidden;
-    }
+      #app {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
 
-    #app {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+      /* Signature element: live pulse bar */
+      #pulse-bar {
+        height: 34px;
+        background: var(--turf);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        gap: 18px;
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        flex-shrink: 0;
+        -webkit-app-region: drag;
+      }
 
-    /* Signature element: live pulse bar */
-    #pulse-bar {
-      height: 34px;
-      background: var(--turf);
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      gap: 18px;
-      font-size: 11px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      flex-shrink: 0;
-      -webkit-app-region: drag;
-    }
+      .pulse-seg {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--sage);
+      }
 
-    .pulse-seg {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--sage);
-    }
+      .pulse-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--sage);
+        transition:
+          background 0.3s,
+          box-shadow 0.3s;
+      }
 
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--sage);
-      transition: background 0.3s, box-shadow 0.3s;
-    }
+      .pulse-seg.live .pulse-dot {
+        background: var(--lime);
+        box-shadow: 0 0 8px var(--lime);
+      }
 
-    .pulse-seg.live .pulse-dot {
-      background: var(--lime);
-      box-shadow: 0 0 8px var(--lime);
-    }
+      .pulse-seg.live {
+        color: var(--chalk);
+      }
 
-    .pulse-seg.live {
-      color: var(--chalk);
-    }
+      #app-title {
+        font-family: 'Archivo Black', sans-serif;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+        color: var(--lime);
+        margin-right: auto;
+      }
 
-    #app-title {
-      font-family: 'Archivo Black', sans-serif;
-      font-size: 13px;
-      letter-spacing: 0.02em;
-      color: var(--lime);
-      margin-right: auto;
-    }
+      /* Main split layout */
+      #main {
+        flex: 1;
+        display: flex;
+        min-height: 0;
+      }
 
-    /* Main split layout */
-    #main {
-      flex: 1;
-      display: flex;
-      min-height: 0;
-    }
+      #crew-col {
+        flex: 1.3;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--line);
+        min-width: 0;
+      }
 
-    #crew-col {
-      flex: 1.3;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--line);
-      min-width: 0;
-    }
+      #context-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background: linear-gradient(180deg, var(--turf) 0%, var(--pitch) 220px);
+      }
 
-    #context-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      background: linear-gradient(180deg, var(--turf) 0%, var(--pitch) 220px);
-    }
+      .col-header {
+        padding: 18px 20px 14px;
+        border-bottom: 1px solid var(--line);
+        flex-shrink: 0;
+      }
 
-    .col-header {
-      padding: 18px 20px 14px;
-      border-bottom: 1px solid var(--line);
-      flex-shrink: 0;
-    }
+      .col-eyebrow {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--sage);
+        margin-bottom: 4px;
+      }
 
-    .col-eyebrow {
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--sage);
-      margin-bottom: 4px;
-    }
+      .col-title {
+        font-family: 'Archivo Black', sans-serif;
+        font-size: 22px;
+        color: var(--chalk);
+      }
 
-    .col-title {
-      font-family: 'Archivo Black', sans-serif;
-      font-size: 22px;
-      color: var(--chalk);
-    }
+      /* Onboarding */
+      #onboarding {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px;
+        gap: 24px;
+      }
 
-    /* Onboarding */
-    #onboarding {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 40px;
-      gap: 24px;
-    }
+      #onboarding h1 {
+        font-family: 'Archivo Black', sans-serif;
+        font-size: 42px;
+        line-height: 1.05;
+        color: var(--chalk);
+      }
 
-    #onboarding h1 {
-      font-family: 'Archivo Black', sans-serif;
-      font-size: 42px;
-      line-height: 1.05;
-      color: var(--chalk);
-    }
+      #onboarding h1 span {
+        color: var(--lime);
+      }
 
-    #onboarding h1 span {
-      color: var(--lime);
-    }
+      #onboarding p {
+        color: var(--sage);
+        font-size: 15px;
+        max-width: 420px;
+        line-height: 1.5;
+      }
 
-    #onboarding p {
-      color: var(--sage);
-      font-size: 15px;
-      max-width: 420px;
-      line-height: 1.5;
-    }
+      .btn-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+      }
 
-    .btn-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 8px;
-    }
+      .btn {
+        font-family: 'Archivo', sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        padding: 13px 26px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        transition:
+          transform 0.15s,
+          opacity 0.15s;
+      }
 
-    .btn {
-      font-family: 'Archivo', sans-serif;
-      font-weight: 700;
-      font-size: 14px;
-      padding: 13px 26px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.15s, opacity 0.15s;
-    }
+      .btn:hover {
+        transform: translateY(-1px);
+      }
 
-    .btn:hover {
-      transform: translateY(-1px);
-    }
+      .btn:active {
+        transform: translateY(0);
+      }
 
-    .btn:active {
-      transform: translateY(0);
-    }
+      .btn-primary {
+        background: var(--lime);
+        color: var(--pitch);
+      }
 
-    .btn-primary {
-      background: var(--lime);
-      color: var(--pitch);
-    }
+      .btn-secondary {
+        background: transparent;
+        color: var(--chalk);
+        border: 1px solid var(--line);
+      }
 
-    .btn-secondary {
-      background: transparent;
-      color: var(--chalk);
-      border: 1px solid var(--line);
-    }
+      .btn-coral {
+        background: var(--coral);
+        color: var(--pitch);
+      }
 
-    .btn-coral {
-      background: var(--coral);
-      color: var(--pitch);
-    }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+      }
 
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-    }
+      #join-input {
+        background: var(--turf-light);
+        border: 1px solid var(--line);
+        color: var(--chalk);
+        font-family: monospace;
+        font-size: 13px;
+        padding: 12px 14px;
+        border-radius: 6px;
+        width: 100%;
+        max-width: 420px;
+      }
 
-    #join-input {
-      background: var(--turf-light);
-      border: 1px solid var(--line);
-      color: var(--chalk);
-      font-family: monospace;
-      font-size: 13px;
-      padding: 12px 14px;
-      border-radius: 6px;
-      width: 100%;
-      max-width: 420px;
-    }
+      #join-input::placeholder {
+        color: var(--sage);
+      }
 
-    #join-input::placeholder {
-      color: var(--sage);
-    }
+      /* ---- Crew feed ---- */
+      #feed-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
 
-    /* ---- Crew feed ---- */
-    #feed-scroll {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+      .msg {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
 
-    .msg {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
+      .msg-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 6px;
+        background: var(--turf-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--lime);
+        flex-shrink: 0;
+      }
 
-    .msg-avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 6px;
-      background: var(--turf-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--lime);
-      flex-shrink: 0;
-    }
+      .msg-body {
+        background: var(--turf);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 9px 12px;
+        font-size: 13.5px;
+        line-height: 1.4;
+        max-width: 78%;
+      }
 
-    .msg-body {
-      background: var(--turf);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 9px 12px;
-      font-size: 13.5px;
-      line-height: 1.4;
-      max-width: 78%;
-    }
+      .msg-from {
+        font-size: 10.5px;
+        color: var(--sage);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 3px;
+      }
 
-    .msg-from {
-      font-size: 10.5px;
-      color: var(--sage);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 3px;
-    }
+      .msg-ai .msg-avatar {
+        background: var(--lime);
+        color: var(--pitch);
+      }
 
-    .msg-ai .msg-avatar {
-      background: var(--lime);
-      color: var(--pitch);
-    }
+      .msg-ai .msg-body {
+        border-color: var(--lime);
+      }
 
-    .msg-ai .msg-body {
-      border-color: var(--lime);
-    }
+      #composer {
+        display: flex;
+        gap: 10px;
+        padding: 14px 20px;
+        border-top: 1px solid var(--line);
+        flex-shrink: 0;
+      }
 
-    #composer {
-      display: flex;
-      gap: 10px;
-      padding: 14px 20px;
-      border-top: 1px solid var(--line);
-      flex-shrink: 0;
-    }
+      #msg-input {
+        flex: 1;
+        background: var(--turf-light);
+        border: 1px solid var(--line);
+        color: var(--chalk);
+        padding: 11px 14px;
+        border-radius: 6px;
+        font-size: 13.5px;
+        font-family: inherit;
+      }
 
-    #msg-input {
-      flex: 1;
-      background: var(--turf-light);
-      border: 1px solid var(--line);
-      color: var(--chalk);
-      padding: 11px 14px;
-      border-radius: 6px;
-      font-size: 13.5px;
-      font-family: inherit;
-    }
+      /* ---- Context column: match + wallet ---- */
+      #context-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
 
-    /* ---- Context column: match + wallet ---- */
-    #context-scroll {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+      .card {
+        background: rgba(245, 242, 232, 0.03);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 16px;
+      }
 
-    .card {
-      background: rgba(245, 242, 232, 0.03);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 16px;
-    }
+      .card-label {
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--sage);
+        margin-bottom: 8px;
+      }
 
-    .card-label {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--sage);
-      margin-bottom: 8px;
-    }
+      .match-teams {
+        font-family: 'Archivo Black', sans-serif;
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
 
-    .match-teams {
-      font-family: 'Archivo Black', sans-serif;
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
+      .match-status {
+        font-size: 11px;
+        color: var(--lime);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
 
-    .match-status {
-      font-size: 11px;
-      color: var(--lime);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
+      .wallet-balance {
+        font-family: 'Archivo Black', sans-serif;
+        font-size: 28px;
+        color: var(--coral);
+      }
 
-    .wallet-balance {
-      font-family: 'Archivo Black', sans-serif;
-      font-size: 28px;
-      color: var(--coral);
-    }
+      .wallet-addr {
+        font-family: monospace;
+        font-size: 11px;
+        color: var(--sage);
+        word-break: break-all;
+        margin-top: 6px;
+      }
 
-    .wallet-addr {
-      font-family: monospace;
-      font-size: 11px;
-      color: var(--sage);
-      word-break: break-all;
-      margin-top: 6px;
-    }
+      .pool-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--line);
+      }
 
-    .pool-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      padding: 6px 0;
-      border-bottom: 1px solid var(--line);
-    }
+      .pool-row:last-child {
+        border-bottom: none;
+      }
 
-    .pool-row:last-child {
-      border-bottom: none;
-    }
+      .stake-controls {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
 
-    .stake-controls {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-    }
+      .stake-controls input {
+        width: 70px;
+        background: var(--turf-light);
+        border: 1px solid var(--line);
+        color: var(--chalk);
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 13px;
+      }
 
-    .stake-controls input {
-      width: 70px;
-      background: var(--turf-light);
-      border: 1px solid var(--line);
-      color: var(--chalk);
-      padding: 8px;
-      border-radius: 6px;
-      font-size: 13px;
-    }
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
 
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
+      ::-webkit-scrollbar-thumb {
+        background: var(--turf-light);
+        border-radius: 4px;
+      }
+    </style>
+  </head>
 
-    ::-webkit-scrollbar-thumb {
-      background: var(--turf-light);
-      border-radius: 4px;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="app">
-    <div id="pulse-bar">
-      <span id="app-title">UltraFan</span>
-      <span class="pulse-seg" id="pulse-crew">
-        <span class="pulse-dot"></span>Crew offline
-      </span>
-      <span class="pulse-seg" id="pulse-ai">
-        <span class="pulse-dot"></span>AI not loaded
-      </span>
-      <span class="pulse-seg" id="pulse-wallet">
-        <span class="pulse-dot"></span>No wallet
-      </span>
-    </div>
-
-    <div id="main">
-      <div id="crew-col">
-        <div id="onboarding">
-          <h1>Your crew.<br /><span>Your AI. Your keys.</span></h1>
-          <p>
-            No server. No cloud AI. No custodian. Create a crew or join one with an invite
-            key - everything syncs peer-to-peer, your wallet never leaves this device.
-          </p>
-          <div class="btn-row">
-            <button class="btn btn-primary" id="btn-create-crew">Create a crew</button>
-            <button class="btn btn-secondary" id="btn-show-join">Join a crew</button>
-          </div>
-          <input type="text" id="join-input" placeholder="Paste crew invite key..." style="display: none" />
-          <button class="btn btn-primary" id="btn-join-crew" style="display: none">
-            Join
-          </button>
-        </div>
+  <body>
+    <div id="app">
+      <div id="pulse-bar">
+        <span id="app-title">UltraFan</span>
+        <span class="pulse-seg" id="pulse-crew"> <span class="pulse-dot"></span>Crew offline </span>
+        <span class="pulse-seg" id="pulse-ai"> <span class="pulse-dot"></span>AI not loaded </span>
+        <span class="pulse-seg" id="pulse-wallet"> <span class="pulse-dot"></span>No wallet </span>
       </div>
 
-      <div id="context-col">
-        <div class="col-header">
-          <div class="col-eyebrow">Get set up</div>
-          <div class="col-title">Sovereignty</div>
+      <div id="main">
+        <div id="crew-col">
+          <div id="onboarding">
+            <h1>Your crew.<br /><span>Your AI. Your keys.</span></h1>
+            <p>
+              No server. No cloud AI. No custodian. Create a crew or join one with an invite key -
+              everything syncs peer-to-peer, your wallet never leaves this device.
+            </p>
+            <div class="btn-row">
+              <button class="btn btn-primary" id="btn-create-crew">Create a crew</button>
+              <button class="btn btn-secondary" id="btn-show-join">Join a crew</button>
+            </div>
+            <input
+              type="text"
+              id="join-input"
+              placeholder="Paste crew invite key..."
+              style="display: none"
+            />
+            <button class="btn btn-primary" id="btn-join-crew" style="display: none">Join</button>
+          </div>
         </div>
-        <div id="context-scroll">
-          <div class="card">
-            <div class="card-label">Local AI</div>
-            <p style="font-size: 13px; color: var(--sage); margin-bottom: 10px">
-              Runs entirely on this device. No API keys, no cloud.
-            </p>
-            <button class="btn btn-primary" id="btn-load-ai" style="width: 100%">
-              Load AI model
-            </button>
+
+        <div id="context-col">
+          <div class="col-header">
+            <div class="col-eyebrow">Get set up</div>
+            <div class="col-title">Sovereignty</div>
           </div>
-          <div class="card">
-            <div class="card-label">Wallet</div>
-            <p style="font-size: 13px; color: var(--sage); margin-bottom: 10px">
-              Self-custodial. Your keys never leave this device.
-            </p>
-            <button class="btn btn-coral" id="btn-init-wallet" style="width: 100%">
-              Create wallet
-            </button>
-          </div>
-          <div class="card">
-            <div class="card-label">Live matches</div>
-            <p style="font-size: 13px; color: var(--sage); margin-bottom: 10px">
-              Connect a football-data.org key to pull live World Cup results.
-            </p>
-            <input type="text" id="api-key-input" placeholder="football-data.org API key" style="
+          <div id="context-scroll">
+            <div class="card">
+              <div class="card-label">Local AI</div>
+              <p style="font-size: 13px; color: var(--sage); margin-bottom: 10px">
+                Runs entirely on this device. No API keys, no cloud.
+              </p>
+              <button class="btn btn-primary" id="btn-load-ai" style="width: 100%">
+                Load AI model
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-label">Wallet</div>
+              <p style="font-size: 13px; color: var(--sage); margin-bottom: 10px">
+                Self-custodial. Your keys never leave this device.
+              </p>
+              <button class="btn btn-coral" id="btn-init-wallet" style="width: 100%">
+                Create wallet
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-label">Live matches</div>
+              <p style="font-size: 13px; color: var(--sage); margin-bottom: 10px">
+                Connect a football-data.org key to pull live World Cup results.
+              </p>
+              <input
+                type="text"
+                id="api-key-input"
+                placeholder="football-data.org API key"
+                style="
                   width: 100%;
                   background: var(--turf-light);
                   border: 1px solid var(--line);
@@ -466,16 +474,16 @@
                   border-radius: 6px;
                   font-size: 12px;
                   margin-bottom: 8px;
-                " />
-            <button class="btn btn-secondary" id="btn-set-api-key" style="width: 100%">
-              Connect live scores
-            </button>
+                "
+              />
+              <button class="btn btn-secondary" id="btn-set-api-key" style="width: 100%">
+                Connect live scores
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <script type="module" src="app.js"></script>
-</body>
-
+    <script type="module" src="app.js"></script>
+  </body>
 </html>

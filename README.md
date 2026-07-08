@@ -1,6 +1,6 @@
 # UltraFan ⚽
 
-> *The first truly sovereign football fan app. No servers. No cloud AI. No middlemen.*
+> _The first truly sovereign football fan app. No servers. No cloud AI. No middlemen._
 
 A World Cup 2026 crew companion built on the full Tether open-source stack which include; Pears P2P networking, QVAC local AI inference and WDK self-custodial wallets running as a native desktop app with zero central infrastructure.
 
@@ -38,14 +38,14 @@ All inter-layer communication goes through a typed JSON message protocol over th
 
 ## Stack
 
-| Layer | Package | Purpose |
-|---|---|---|
-| P2P networking | `hyperswarm`, `autobase`, `corestore`, `hyperbee` | Crew discovery, multi-writer feed, persistent view |
-| Local AI | `@qvac/bare-sdk` | On-device LLM — no cloud, no API key |
-| Wallet | `bare-crypto` + JSON-RPC | Key generation, EVM address derivation, balance queries |
-| Live data | `football-data.org` v4 API | World Cup 2026 match results (60s polling) |
-| Runtime | Pear / Bare (via `pear-runtime`) | Bare worker process inside Electron shell |
-| UI | Plain HTML/CSS/JS | Renderer process, no framework |
+| Layer          | Package                                           | Purpose                                                 |
+| -------------- | ------------------------------------------------- | ------------------------------------------------------- |
+| P2P networking | `hyperswarm`, `autobase`, `corestore`, `hyperbee` | Crew discovery, multi-writer feed, persistent view      |
+| Local AI       | `@qvac/bare-sdk`                                  | On-device LLM — no cloud, no API key                    |
+| Wallet         | `bare-crypto` + JSON-RPC                          | Key generation, EVM address derivation, balance queries |
+| Live data      | `football-data.org` v4 API                        | World Cup 2026 match results (60s polling)              |
+| Runtime        | Pear / Bare (via `pear-runtime`)                  | Bare worker process inside Electron shell               |
+| UI             | Plain HTML/CSS/JS                                 | Renderer process, no framework                          |
 
 ---
 
@@ -91,7 +91,7 @@ npm start
 
 ## Usage
 
-**Create a crew** -  generates a Hyperswarm discovery key. Share it with friends to join.
+**Create a crew** - generates a Hyperswarm discovery key. Share it with friends to join.
 
 **Join a crew** - paste the crew key. State syncs automatically over Pears.
 

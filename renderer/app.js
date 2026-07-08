@@ -44,11 +44,18 @@ function setupWorkerListeners() {
   bridge.onWorkerStderr(WORKER, (data) => {
     const msg = decoder.decode(data)
     // Suppress llama.cpp verbose repacking noise — not actionable errors
-    if (msg.includes('repack:') || msg.includes('ggml_vulkan') ||
-      msg.includes('no usable GPU') || msg.includes('gpu-layers') ||
-      msg.includes('llama.cpp was compiled') || msg.includes('initFromConfig') ||
-      msg.includes('common_init_result') || msg.includes('parse: load') ||
-      msg.includes('build.md')) return
+    if (
+      msg.includes('repack:') ||
+      msg.includes('ggml_vulkan') ||
+      msg.includes('no usable GPU') ||
+      msg.includes('gpu-layers') ||
+      msg.includes('llama.cpp was compiled') ||
+      msg.includes('initFromConfig') ||
+      msg.includes('common_init_result') ||
+      msg.includes('parse: load') ||
+      msg.includes('build.md')
+    )
+      return
     console.error('[worker stderr]', msg)
   })
 
@@ -109,9 +116,15 @@ function handleWorkerMessage(msg) {
       setPulse('wallet', true, shortAddr(myAddress))
       // Reset any "Creating..." buttons regardless of which screen we're on
       const btn1 = document.getElementById('btn-init-wallet')
-      if (btn1) { btn1.disabled = false; btn1.textContent = 'Wallet ready ✓' }
+      if (btn1) {
+        btn1.disabled = false
+        btn1.textContent = 'Wallet ready ✓'
+      }
       const btn2 = document.getElementById('btn-init-wallet-2')
-      if (btn2) { btn2.disabled = false; btn2.textContent = 'Wallet ready ✓' }
+      if (btn2) {
+        btn2.disabled = false
+        btn2.textContent = 'Wallet ready ✓'
+      }
       // Render wallet card if crew view is active
       renderWalletCard(msg.payload.seedPhrase)
       // Request balance (non-blocking, may fail silently)
@@ -315,17 +328,19 @@ function enterContextView() {
   `
 
   const btn2 = document.getElementById('btn-init-wallet-2')
-  if (btn2) btn2.addEventListener('click', (e) => {
-    e.target.disabled = true
-    e.target.textContent = 'Creating...'
-    sendToWorker('wallet:init')
-  })
+  if (btn2)
+    btn2.addEventListener('click', (e) => {
+      e.target.disabled = true
+      e.target.textContent = 'Creating...'
+      sendToWorker('wallet:init')
+    })
   const btnAi2 = document.getElementById('btn-load-ai-2')
-  if (btnAi2) btnAi2.addEventListener('click', (e) => {
-    e.target.disabled = true
-    e.target.textContent = 'Loading...'
-    sendToWorker('ai:loadModel')
-  })
+  if (btnAi2)
+    btnAi2.addEventListener('click', (e) => {
+      e.target.disabled = true
+      e.target.textContent = 'Loading...'
+      sendToWorker('ai:loadModel')
+    })
   document.getElementById('btn-set-api-key-2').addEventListener('click', () => {
     const key = document.getElementById('api-key-input-2').value.trim()
     if (!key) return
@@ -399,7 +414,9 @@ function renderPool() {
   const body = document.getElementById('pool-body')
   if (!body || !currentMatch) return
 
-  const stakesForMatch = crewPredictions.filter((p) => String(p.matchId) === String(currentMatch.id))
+  const stakesForMatch = crewPredictions.filter(
+    (p) => String(p.matchId) === String(currentMatch.id)
+  )
   const total = stakesForMatch.reduce((s, p) => s + Number(p.stake || 0), 0)
 
   body.innerHTML = `
