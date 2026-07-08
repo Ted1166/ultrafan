@@ -329,19 +329,21 @@ function enterContextView() {
   `
 
   const btn2 = document.getElementById('btn-init-wallet-2')
-  if (btn2)
+  if (btn2) {
     btn2.addEventListener('click', (e) => {
       e.target.disabled = true
       e.target.textContent = 'Creating...'
       sendToWorker('wallet:init')
     })
+  }
   const btnAi2 = document.getElementById('btn-load-ai-2')
-  if (btnAi2)
+  if (btnAi2) {
     btnAi2.addEventListener('click', (e) => {
       e.target.disabled = true
       e.target.textContent = 'Loading...'
       sendToWorker('ai:loadModel')
     })
+  }
   document.getElementById('btn-set-api-key-2').addEventListener('click', () => {
     const key = document.getElementById('api-key-input-2').value.trim()
     if (!key) {
